@@ -1,0 +1,1 @@
+<?$_=STDIN;$z="BLOCK\n";$y="WAIT\n";list(,$b,,$d,$e,,,$h)=fscanf($_,"%d%d%d%d%d%d%d%d");$m=$i=0;for(;$i++<$h;){fscanf($_,"%d%d",$k,$l);$j[$k]=$l;}for(;;){fscanf($_,"%d%d%s",$n,$o,$p);if($m>=$n){echo($o==0||$o==$b-1)?$z:$y;}else{$q=($n==$d)?$e:$j[$n];$m=$n;echo($p=="LEFT")?($q<$o?$y:$z):($q>$o?$y:$z);}}

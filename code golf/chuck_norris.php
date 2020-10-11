@@ -1,0 +1,1 @@
+<?$m=stream_get_line(STDIN,100+1,"\n");$a=str_split($m);$s=null;foreach($a as $L){$s.=str_pad(decbin(ord($L)),7,'0',STR_PAD_LEFT);}$o=null;$B=str_split($s);for($i=0,$n=count($B);$i<$n;++$i){$c=$B[$i];$f=($c?'0 ':'00 ');$k='';do{$k.='0';$i++;}while($i<$n&&$c==$B[$i]);$o.=$f.$k.' ';$i--;}$o=trim($o);echo($o);?>

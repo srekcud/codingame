@@ -1,0 +1,1 @@
+<?fscanf(STDIN,"%d %d %d %d",$a,$b,$c,$d);while(1){$e="";if($d<$b){echo("S");$d++;}elseif($d>$b){$e.="N";$d--;}if($c<$a){$e.="E";$c++;}elseif($c>$a){$e.="W";$c--;}echo($e."\n");}

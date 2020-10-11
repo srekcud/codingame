@@ -1,0 +1,1 @@
+r=readline;print(+r(r()).split(' ').sort((a,b)=>a*a<b*b?-1:a*a>b*b|a<b)[0])
