@@ -1,3 +1,5 @@
+![codingame screen](https://github.com/srekcud/codingame/blob/main/codingame.JPG?raw=true)
+
 # codingame
 
 In this repository you can find my solutions to the different puzzles and contests i have made on [codingame](https://www.codingame.com/home)
