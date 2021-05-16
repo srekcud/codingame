@@ -195,19 +195,7 @@ while (TRUE) {
             if( !$isDormant || $size == 0 ){
                 $myTree[$size][] = new Tree( $cellIndex, $isDormant, $size );
             }
-            $T[0]++;
-            switch ( $size )
-            {
-                case 1:
-                    $T[1]+= 1;
-                break;
-                case 2:
-                    $T[2]+= 1;
-                break;
-                case 3:
-                    $T[3]+= 1;
-                break;
-            }
+            $T[$size]++;
         }
 
     }
