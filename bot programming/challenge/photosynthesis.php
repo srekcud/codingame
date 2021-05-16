@@ -1,469 +1,273 @@
 <?php
 
-class Action
+class Cell
 {
-    protected $actionId;
-    protected $actionType;
-    protected $delta0;
-    protected $delta1;
-    protected $delta2;
-    protected $delta3;
-    protected $price;
-    protected $tomeIndex;
-    protected $taxCount;
-    protected $castable;
-    protected $repeatable;
+    protected $index;
+    protected $richness;
+    protected $neighbours;
 
     /**
-     * Get the value of actionId
+     * Get the value of index
      */
-    public function getActionId()
+    public function getIndex()
     {
-        return $this->actionId;
+        return $this->index;
     }
 
     /**
-     * Set the value of actionId
+     * Set the value of index
      *
      * @return  self
      */
-    public function setActionId($actionId)
+    public function setIndex( $index )
     {
-        $this->actionId = $actionId;
+        $this->index = $index;
 
         return $this;
     }
 
     /**
-     * Get the value of actionType
+     * Get the value of richness
      */
-    public function getActionType()
+    public function getRichness()
     {
-        return $this->actionType;
+        return $this->richness;
     }
 
     /**
-     * Set the value of actionType
+     * Set the value of richness
      *
      * @return  self
      */
-    public function setActionType($actionType)
+    public function setRichness( $richness )
     {
-        $this->actionType = $actionType;
+        $this->richness = $richness;
 
         return $this;
     }
 
-    /**
-     * Get the value of delta0
+     /**
+     * Get the value of neighbours
      */
-    public function getDelta0()
+    public function getNeighbours()
     {
-        return $this->delta0;
+        return $this->neighbours;
     }
 
     /**
-     * Set the value of delta0
+     * Set the value of neighbours
      *
      * @return  self
      */
-    public function setDelta0($delta0)
+    public function setNeighbours( $neighbours )
     {
-        $this->delta0 = $delta0;
+        $this->neighbours = $neighbours;
 
         return $this;
     }
 
-    /**
-     * Get the value of delta1
-     */
-    public function getDelta1()
+    public function __construct( $index, $richness, $neighbours )
     {
-        return $this->delta1;
-    }
-
-    /**
-     * Set the value of delta1
-     *
-     * @return  self
-     */
-    public function setDelta1($delta1)
-    {
-        $this->delta1 = $delta1;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of delta2
-     */
-    public function getDelta2()
-    {
-        return $this->delta2;
-    }
-
-    /**
-     * Set the value of delta2
-     *
-     * @return  self
-     */
-    public function setDelta2($delta2)
-    {
-        $this->delta2 = $delta2;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of delta3
-     */
-    public function getDelta3()
-    {
-        return $this->delta3;
-    }
-
-    /**
-     * Set the value of delta3
-     *
-     * @return  self
-     */
-    public function setDelta3($delta3)
-    {
-        $this->delta3 = $delta3;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of price
-     */
-    public function getPrice()
-    {
-        return $this->price;
-    }
-
-    /**
-     * Set the value of price
-     *
-     * @return  self
-     */
-    public function setPrice($price)
-    {
-        $this->price = $price;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of tomeIndex
-     */
-    public function getTomeIndex()
-    {
-        return $this->tomeIndex;
-    }
-
-    /**
-     * Set the value of tomeIndex
-     *
-     * @return  self
-     */
-    public function setTomeIndex($tomeIndex)
-    {
-        $this->tomeIndex = $tomeIndex;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of taxCount
-     */
-    public function getTaxCount()
-    {
-        return $this->taxCount;
-    }
-
-    /**
-     * Set the value of taxCount
-     *
-     * @return  self
-     */
-    public function setTaxCount($taxCount)
-    {
-        $this->taxCount = $taxCount;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of castable
-     */
-    public function getCastable()
-    {
-        return $this->castable;
-    }
-
-    /**
-     * Set the value of castable
-     *
-     * @return  self
-     */
-    public function setCastable($castable)
-    {
-        $this->castable = $castable;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of repeatable
-     */
-    public function getRepeatable()
-    {
-        return $this->repeatable;
-    }
-
-    /**
-     * Set the value of repeatable
-     *
-     * @return  self
-     */
-    public function setRepeatable($repeatable)
-    {
-        $this->repeatable = $repeatable;
-
-        return $this;
-    }
-
-    public function __construct($actionId, $actionType, $delta0, $delta1, $delta2, $delta3, $price, $tomeIndex, $taxCount, $castable, $repeatable)
-    {
-        $this->setActionId($actionId)
-            ->setActionType($actionType)
-            ->setDelta0($delta0)
-            ->setDelta1($delta1)
-            ->setDelta2($delta2)
-            ->setDelta3($delta3)
-            ->setPrice($price)
-            ->setTomeIndex($tomeIndex)
-            ->setTaxCount($taxCount)
-            ->setCastable($castable)
-            ->setRepeatable($repeatable);
+        $this->setIndex( $index );
+        $this->setRichness( $richness );
+        $this->setNeighbours ( $neighbours );
     }
 }
 
-class Brew
+class Tree
 {
-
+    protected $index;
+    protected $dormant;
+    protected $size;
 
     /**
-     * ratio Rubis / nombre de tour
-     * trouver un moyen de calculer le nombre de tour
-     * a priori nombre de tour pour delta X =  X + 1 ( REST )
-     * donc nombre de tour pour une recette = n X + ( n/2 - 2 ) recast delta0
+     * Get the value of index
      */
-    public function getBestBrew($brewList)
-    {//change this
-    // error_log(var_export($brewList, true));
-
-       usort($brewList,"sortbrewbyminprice");
-    // error_log(var_export($brewList, true));
-
-        return array_shift($brewList);
-    }
-}
-
-class Cast
-{
-    protected $delta0CastId;
-    protected $delta1CastId;
-    protected $delta2CastId;
-    protected $delta3CastId;
-
-    public function getDelta0CastId()
+    public function getIndex()
     {
-        return $this->delta0CastId;
-    }
-    public function getDelta1CastId()
-    {
-        return $this->delta1CastId;
-    }
-    public function getDelta2CastId()
-    {
-        return $this->delta2CastId;
-    }
-    public function getDelta3CastId()
-    {
-        return $this->delta3CastId;
+        return $this->index;
     }
 
-    public function setDeltaXCastId($castList,$x)
+    /**
+     * Set the value of index
+     *
+     * @return  self
+     */
+    public function setIndex( $index )
     {
-        $get = "getDelta".$x;
-        $d = "delta".$x."CastId";
-        foreach($castList as $cast){
-            if($cast->$get() > 0){$this->$d = $cast->getActionId();}
-        }
+        $this->index = $index;
 
         return $this;
     }
 
-    public function castDelta0($castList)
+    /**
+     * Get the value of dormant
+     */
+    public function getDormant()
     {
-        if($castList[$this->getDelta0CastId()]->getCastable() != 1){
-            $return[] = "REST\n";
-        }else{
-            $id = $this->getDelta0CastId();
-            $return[] = "CAST {$id}\n";
-        }
-        return $return;
+        return $this->dormant;
     }
 
-    public function castDelta1($castList,$needs)
+    /**
+     * Set the value of dormant
+     *
+     * @return  self
+     */
+    public function setDormant( $dormant )
     {
-        if($needs[0] < 1){
-            $return = $this->castDelta0($castList);
-        }elseif($castList[$this->getDelta1CastId()]->getCastable() != 1){
-            $return[] = "REST\n";
-        }else{
-            $id = $this->getDelta1CastId();
-            $return[] = "CAST {$id}\n";
-        }
+        $this->dormant = $dormant;
 
-        return $return;
-
+        return $this;
     }
 
-    public function castDelta2($castList,$needs)
+    /**
+     * Get the value of size
+     */
+    public function getSize()
     {
-        if($needs[1] < 1){
-            $return = $this->castDelta1($castList,$needs);
-        }elseif($castList[$this->getDelta2CastId()]->getCastable() != 1){
-            $return[] = "REST\n";
-        }else{
-            $id = $this->getDelta2CastId();
-            $return[] = "CAST {$id}\n";
-        }
-
-        return $return;
-
+        return $this->size;
     }
 
-    public function castDelta3($castList,$needs)
+    /**
+     * Set the value of size
+     *
+     * @return  self
+     */
+    public function setSize( $size )
     {
-        if($needs[2] < 1 ){
-            $return = $this->castDelta2($castList,$needs);
-        }elseif($castList[$this->getDelta3CastId()]->getCastable() != 1){
-            $return[] = "REST\n";
-        }else{
-            $id = $this->getDelta3CastId();
-            $return[] = "CAST {$id}\n";
-        }
+        $this->size = $size;
 
-        return $return;
-
+        return $this;
     }
 
-
-    public function __construct($castList)
+    public function __construct( $index, $dormant, $size )
     {
-        $this->setDeltaXCastId($castList,0);
-        $this->setDeltaXCastId($castList,1);
-        $this->setDeltaXCastId($castList,2);
-        $this->setDeltaXCastId($castList,3);
+        $this->setIndex( $index );
+        $this->setDormant( $dormant );
+        $this->setSize( $size );
     }
+
 }
 
-function sortbrewbyminprice($a,$b)
-    {
-        return($a->getPrice() < $b->getPrice()) ? -1 : 1;
-    }
-$turn = 1 ;
-$actionList=[];
+// $numberOfCells: 37
+fscanf(STDIN, "%d", $numberOfCells);
+for ($i = 0; $i < $numberOfCells; $i++) {
+    // $index: 0 is the center cell, the next cells spiral outwards
+    // $richness: 0 if the cell is unusable, 1-3 for usable cells
+    // $neigh0: the index of the neighbouring cell for each direction
+    fscanf(STDIN, "%d %d %d %d %d %d %d %d", $index, $richness, $neigh0, $neigh1, $neigh2, $neigh3, $neigh4, $neigh5);
+    $cells[$index] = new Cell( $index, $richness, [$neigh0, $neigh1, $neigh2, $neigh3, $neigh4, $neigh5]);
+}
+$S = 0;
+$d = -1;
+$trees = 0;
+// game loop
 while (TRUE) {
-    $castList = $brewList = [];
-    // $actionCount: the number of spells and recipes in play
-    fscanf(STDIN, "%d", $actionCount);
-    for ($i = 0; $i < $actionCount; $i++) {
-        // $actionId: the unique ID of this spell or recipe
-        // $actionType: in the first league: BREW; later: CAST, OPPONENT_CAST, LEARN, BREW
-        // $delta0: tier-0 ingredient change
-        // $delta1: tier-1 ingredient change
-        // $delta2: tier-2 ingredient change
-        // $delta3: tier-3 ingredient change
-        // $price: the price in rupees if this is a potion
-        // $tomeIndex: in the first two leagues: always 0; later: the index in the tome if this is a tome spell, equal to the read-ahead tax
-        // $taxCount: in the first two leagues: always 0; later: the amount of taxed tier-0 ingredients you gain from learning this spell
-        // $castable: in the first league: always 0; later: 1 if this is a castable player spell
-        // $repeatable: for the first two leagues: always 0; later: 1 if this is a repeatable player spell
-        fscanf(STDIN, "%d %s %d %d %d %d %d %d %d %d %d", $actionId, $actionType, $delta0, $delta1, $delta2, $delta3, $price, $tomeIndex, $taxCount, $castable, $repeatable);
+    $myTree=[];
+    $possibleAction=[];
+    $T=[0,0,0,0];
+    $seed = "";
+    // $day: the game lasts 24 days: 0-23
+    fscanf(STDIN, "%d", $day);
+    // $nutrients: the base score you gain from the next COMPLETE action
+    fscanf(STDIN, "%d", $nutrients);
+    // $sun: your sun points
+    // $score: your current score
+    fscanf(STDIN, "%d %d", $sun, $score);
+    if($day > $d){
+        $S += $sun;
+        $d = $day;
+        error_log(var_export($S,true));
+    }
+    // $oppSun: opponent's sun points
+    // $oppScore: opponent's score
+    // $oppIsWaiting: whether your opponent is asleep until the next day
+    fscanf(STDIN, "%d %d %d", $oppSun, $oppScore, $oppIsWaiting);
+    // $numberOfTrees: the current amount of trees
+    fscanf(STDIN, "%d", $numberOfTrees);
+    for ($i = 0; $i < $numberOfTrees; $i++) {
+        // $cellIndex: location of this tree
+        // $size: size of this tree: 0-3
+        // $isMine: 1 if this is your tree
+        // $isDormant: 1 if this tree is dormant
+        fscanf(STDIN, "%d %d %d %d", $cellIndex, $size, $isMine, $isDormant);
+        if( $isMine ){
+            if( !$isDormant || $size == 0 ){
+                $myTree[$size][] = new Tree( $cellIndex, $isDormant, $size );
+            }
+            $T[0]++;
+            switch ( $size )
+            {
+                case 1:
+                    $T[1]+= 1;
+                break;
+                case 2:
+                    $T[2]+= 1;
+                break;
+                case 3:
+                    $T[3]+= 1;
+                break;
+            }
+        }
 
-        switch ($actionType) {
-            case "CAST":
-                $castList[$actionId] = new Action($actionId, $actionType, $delta0, $delta1, $delta2, $delta3, $price, $tomeIndex, $taxCount, $castable, $repeatable);
-                break;
-            case "BREW":
-                $brewList[$actionId] = new Action($actionId, $actionType, $delta0, $delta1, $delta2, $delta3, $price, $tomeIndex, $taxCount, $castable, $repeatable);
-                break;
+    }
+    // $numberOfPossibleActions: all legal actions
+    fscanf(STDIN, "%d", $numberOfPossibleActions);
+    $max = 0 ;
+    $min = 40;
+    for ($i = 0; $i < $numberOfPossibleActions; $i++) {
+
+        $action = preg_split("/[\s]+/",stream_get_line(STDIN, 31 + 1, "\n"));// try printing something from here to start with
+        //error_log(var_export($action,true));
+
+        if($action[0] == "SEED" &&
+          !in_array($action[2],$cells[$action[1]]->getNeighbours()) &&
+          $cells[$action[2]]->getRichness() >= $max ){
+            error_log(var_export($action,true));
+            error_log(var_export($cells[$action[1]]->getNeighbours(),true));
+            $seed = "SEED {$action[1]} {$action[2]}\n";
+            $max = $cells[$action[2]]->getRichness();
+            $min = $action[1];
         }
     }
-    // error_log(var_export($brewList, true));
-    // error_log(var_export($brew[0]->getActionId(), true));
-    // error_log(var_export($castList, true));
+    // GROW cellIdx | SEED sourceIdx targetIdx | COMPLETE cellIdx | WAIT <message>
 
-    // We are always i = 0
-    for ($i = 0; $i < 2; $i++) {
-        // $inv0: tier-0 ingredients in inventory
-        // $score: amount of rupees
-        fscanf(STDIN, "%d %d %d %d %d", $inv0, $inv1, $inv2, $inv3, $score);
+    if( isset($myTree[3]) &&
+             count($myTree[3]) > 0  &&
+             ($nutrients <= ($T[0]*1.5 ) || ( $cells[$myTree[3][0]->getIndex()]->getRichness() == 3 && $nutrients < 20 ) || $day >= 22)&&
+             $sun >= 4
+             ) {
+        //error_log(var_export("3", true));
+        $id = $myTree[3][0]->getIndex();
+        echo("COMPLETE {$id}\n");
 
-        $inventory[$i] = [$inv0, $inv1, $inv2, $inv3, $score];
+    }elseif( isset($myTree[2]) &&
+             count($myTree[2]) > 0 &&
+             $sun >= ( 7 + $T[3] )
+             ) {
+        //error_log(var_export("2", true));
+        $id = $myTree[2][0]->getIndex();
+        echo("GROW {$id}\n");
+
+    }elseif( isset($myTree[1]) &&
+             count($myTree[1]) > 0 &&
+             $sun >= ( 3 + $T[2] )
+             ) {
+        //error_log(var_export("1", true));
+        $id = $myTree[1][0]->getIndex();
+        echo("GROW {$id}\n");
+
+    }elseif( isset($myTree[0]) && $sun >= ( 1 + $T[1])) {
+        //error_log(var_export("0", true));
+        $id = $myTree[0][0]->getIndex();
+        echo("GROW {$id}\n");
+
+    }elseif( (!isset($myTree[0]) || ( isset($myTree[0]) && count($myTree[0]) < 1 ) ) && $seed != '' && $trees <= 10 ) {
+        //seed
+        echo( $seed );
+        $trees ++;
+    }else{
+        echo( "WAIT\n");
     }
-    // error_log(var_export($inventory, true));
-    $brew = new Brew();
-    $cast = new Cast($castList);
-
-    //TODO : if bbrew not in brewlist
-
-
-    $bbrew = $brew->getBestBrew($brewList);
-    // error_log(var_export($bbrew, true));
-
-    $needs=[
-        $bbrew->getDelta0()+$inventory[0][0],
-        $bbrew->getDelta1()+$inventory[0][1],
-        $bbrew->getDelta2()+$inventory[0][2],
-        $bbrew->getDelta3()+$inventory[0][3],
-    ];
-    // error_log(var_export($needs, true));
-    $castLvl = "BREW";
-    for($i=0 ; $i<=3; $i++){
-        if($needs[$i] < 0){
-            $castLvl = $i;
-        }
-    }
-if($castLvl!= "BREW"){
-    $c = "castDelta".$castLvl;
-
-
-    $ret = $cast->$c($castList,$needs);
-    foreach($ret as $r){
-        $actionList[] = $r;
-    }
-}else{
-    $actionList[] = "BREW ". $bbrew->getActionId()."\n";
+// TODO check for Level 2 neighbours
 }
-    // error_log(var_export($actionList, true));
-
-    // To debug: error_log(var_export($var, true)); (equivalent to var_dump)
-
-
-    // in the first league: BREW <id> | WAIT; later: BREW <id> | CAST <id> [<times>] | LEARN <id> | REST | WAIT
-    // echo("BREW {$actions[0]["actionid"]}\n");
-    $action = array_shift($actionList);
-    echo ($action);
-
-    $turn++;
-}
-
-// regarder si un sort castable est utile  --> evite un rest
-// regarder pour le vrai best brew
-// checker le score de l'adversaire pour savoir si c'est mieux de brew un gros socre ou pas
