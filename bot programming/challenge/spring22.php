@@ -3,11 +3,12 @@
 class Utilities
 {
 
-    public function getBaseDistance(Hero $a, $baseX,$baseY)
+    public function getBaseDistance(Meeple $a, $baseX,$baseY)
     {
         return sqrt( pow($baseX - $a->getX(),2) + pow($baseY - $a->getY(),2) ) ;
     }
-    public function getDistance(Hero $a, Monster $b)
+
+    public function getDistance(Hero $a, $b)
     {
         return sqrt( pow($b->getX() - $a->getX(),2) + pow($b->getY() - $a->getY(),2) ) ;
     }
@@ -19,7 +20,7 @@ class Utilities
         $notTargetable = false ;
         foreach($heroes as $h){
             $d = $this->getDistance($h,$monster);
-            if( $d < $min && $h->getTarget() == -1 )
+            if( $h->getId() != 2 && $h->getId() !=  5 && $d < $min && $h->getTarget() == -1 )
             {
                 $min = $d;
                 $return = $h;
@@ -36,11 +37,29 @@ class Utilities
     public function getNearestMonster(Hero $hero,array $monsters)
     {
         $min = 999999999;
-        $return = -1;
+        $return = new Monster(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1);
+        foreach($monsters as $m){
+            $d = $this->getDistance($hero,$m);
+            if( $d < $min && $m->getThreatFor() != 2)
+            {
+                $min = $d;
+                $m->setDistance($d);
+                $return = $m;
+            }
+        }
+        return $return;
+    }
+
+    public function getNearestMonsterBerzerk(Hero $hero,array $monsters,$baseX,$baseY)
+    {
+        $min = 999999999;
+        $return = new Monster(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1);
+        /** @var Monster $m */
         foreach($monsters as $m){
 
             $d = $this->getDistance($hero,$m);
-            if( $d < $min && $m->getThreatFor() != 2)
+            //error_log(var_export($m->getId().' : '.$d, true));
+            if( $d < $min && $this->getBaseDistance($m,$baseX,$baseY)> 11000 && $m->getShieldLife() == 0 /*&& $m->getThreatFor() != 2*/)
             {
 
                 $min = $d;
@@ -51,6 +70,140 @@ class Utilities
         return $return;
     }
 
+    public function getMobById($id, $mob)
+    {
+        $return = new Monster(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1);
+        foreach($mob as $m)
+        {
+            if($m->getId() == $id){
+                $return=$m;
+            }
+        }
+
+        return $return;
+    }
+
+    public function getMove($t,$shield,$h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY,$loop = 0)
+    {
+        if($t == -1 )
+        {
+            if($shield) {
+                $return = "SPELL SHIELD {$h->getId()} ---\n";
+                $myM -= 10;
+            }elseif(count($mob)>0 && $loop = 0){
+                $mobTarget = $this->getNearestMonster($h,$mob);
+                $return = $this->getMove($mobTarget->getId(),$shield,$h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY,$loop = 1);
+            }else {
+                switch ($h->getId()) {
+                    case 0:
+                        $return = "MOVE 6000 2000 0\n";
+                        break;
+                    case 1:
+                        $return = "MOVE 3500 5000 1\n";
+                        break;
+                    case 3:
+                        $return = "MOVE 14000 4000 3\n";
+                        break;
+                    case 4:
+                        $return = "MOVE 12000 6800 4\n";
+                        break;
+                }
+            }
+
+        }else{
+            /** @var Monster $mobTarget */
+            $mobTarget = $this->getMobById($t, $danger + $mob);
+            $dist = $this->getDistance($h,$mobTarget);
+
+            if($bdist > 8000){
+                $return = "MOVE {$baseX} {$baseY} {$h->getId()} HOME !\n";
+            }
+            if($shield){
+                $return = "SPELL SHIELD {$h->getId()} ---\n";
+                $myM-=10;
+            }elseif($mobTarget->getHealth() == $maxHealth &&
+                $mobTarget->getBaseDistance() >4700 &&
+                $dist <=2200 &&
+                //$dist > 800 &&
+                $myM >= 30 &&
+                $mobTarget->getShieldLife() == 0 &&
+                $mobTarget->getThreatFor() != 2){
+                $return = "SPELL CONTROL {$t} {$enemyBase['x']} {$enemyBase['y']} {$h->getId()}@{$t}\n";
+                $myM-=10;
+            }elseif($dist <=1280 &&
+                $myM >= 10 &&
+                ($bdist <= 5000) &&
+                $mobTarget->getShieldLife() == 0)
+            {
+                $return = "SPELL WIND {$enemyBase['x']} {$enemyBase['y']} {$h->getId()}W{$t}\n";
+                $myM-=10;
+            }else {
+
+                $x = ($mobTarget->getX() + $mobTarget->getVx());
+                $y = ($mobTarget->getY() + $mobTarget->getVy());
+                $return = "MOVE {$x} {$y} {$h->getId()}#{$t}\n";
+            }
+        }
+
+        return $return;
+    }
+
+    public function getMoveBerzerker($h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY)
+    {
+        /** @var Monster $mobTarget */
+        /** @var Hero $h */
+        if($h->getTarget() != -1){
+            $mobTarget = $this->getMobById($h->getTarget(),$mob);
+        }else {
+            $mobTarget = $this->getNearestMonsterBerzerk($h, $mob+$danger,$baseX,$baseY);
+
+        }
+        if($mobTarget->getId() == -1 )
+        {
+            switch ($h->getId()) {
+                case 2:
+                    //echo("MOVE 4000 3000 {$j}\n");
+                    //$return = "MOVE 8700 4500 2\n";
+                    $return = "MOVE 12700 6400 2\n";
+                    break;
+                case 5:
+                    //echo("MOVE 13850 5700 {$j}\n");
+                    //$return = "MOVE 8700 4500 5\n";
+                    $return = "MOVE 4700 3400 5\n";
+                    break;
+            }
+        }else{
+
+            $dist = $this->getDistance($h,$mobTarget) ;
+            $mobTarget->setBaseDistance($this->getBaseDistance($mobTarget,$baseX,$baseY));
+            if($mobTarget->getBaseDistance() > 13000 && $myM >= 30 && $mobTarget->getThreatFor() == 2){
+                $return = "SPELL SHIELD {$mobTarget->getId()} {$h->getId()}---{$mobTarget->getId()}\n";
+                $myM -= 10;
+            }elseif($dist <=2200 &&
+                //$dist > 800 &&
+                $myM >= 30 &&
+                $mobTarget->getHealth() == $maxHealth &&
+                $maxHealth >= 14 &&
+                $mobTarget->getShieldLife() == 0 &&
+                $mobTarget->getThreatFor() != 2){
+                $return = "SPELL CONTROL {$mobTarget->getId()} {$enemyBase['x']} {$enemyBase['y']} {$h->getId()}@{$mobTarget->getId()}\n";
+                $myM-=10;
+            }elseif($dist <=1280 &&
+                $myM >= 30 &&
+                $mobTarget->getShieldLife() == 0)
+            {
+                $return = "SPELL WIND {$enemyBase['x']} {$enemyBase['y']} {$h->getId()}W{$mobTarget->getId()}\n";
+                $myM-=10;
+            }else {
+
+                $x = ($mobTarget->getX() + $mobTarget->getVx());
+                $y = ($mobTarget->getY() + $mobTarget->getVy());
+                $return = "MOVE {$x} {$y} {$h->getId()}#{$mobTarget->getId()}\n";
+            }
+        }
+
+        return $return;
+    }
 }
 
 class Meeple
@@ -126,9 +279,10 @@ class Monster extends Meeple
     protected $distance;
     protected $shieldLife;
     protected $isControlled;
+    protected $baseDistance;
 
 
-    public function __construct( $id, $x, $y, $health, $vx, $vy, $nearBase, $threatFor,$shieldLife,$isControlled )
+    public function __construct( $id, $x, $y, $health, $vx, $vy, $nearBase, $threatFor,$shieldLife,$isControlled)
     {
         parent::__construct($id, $x, $y);
         $this->setHealth($health);
@@ -138,6 +292,22 @@ class Monster extends Meeple
         $this->setThreatFor($threatFor);
         $this->setShieldLife($shieldLife);
         $this->setIsControlled($isControlled);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBaseDistance()
+    {
+        return $this->baseDistance;
+    }
+
+    /**
+     * @param mixed $baseDistance
+     */
+    public function setBaseDistance($baseDistance): void
+    {
+        $this->baseDistance = $baseDistance;
     }
 
 
@@ -275,10 +445,14 @@ class Monster extends Meeple
 class Hero extends Meeple
 {
     protected $target = -1;
+    protected $shieldLife;
+    protected $isControlled;
 
-    public function __construct($id, $x, $y)
+    public function __construct($id, $x, $y, $shieldLife, $isControlled)
     {
         parent::__construct($id, $x, $y);
+        $this->setIsControlled($isControlled);
+        $this->setShieldLife($shieldLife);
     }
 
     /**
@@ -297,25 +471,65 @@ class Hero extends Meeple
         $this->target = $target;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getIsControlled()
+    {
+        return $this->isControlled;
+    }
+
+    /**
+     * @param mixed $isControlled
+     */
+    public function setIsControlled($isControlled): void
+    {
+        $this->isControlled = $isControlled;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShieldLife()
+    {
+        return $this->shieldLife;
+    }
+
+    /**
+     * @param mixed $shieldLife
+     */
+    public function setShieldLife($shieldLife): void
+    {
+        $this->shieldLife = $shieldLife;
+    }
+
+
 
 }
 
 fscanf(STDIN, "%d %d", $baseX, $baseY);
 // (0,0) || (17630,9000)
 if($baseX == 0){
-    $enemyBase = ['x'=>17630, 'y'=>9000];
+    $enemyBase = ['x'=>12666, 'y'=>8700];
 }else {
-    $enemyBase = ['x'=>0,'y'=>0];
+    $enemyBase = ['x'=>125,'y'=>4800];
 }
 
 fscanf(STDIN, "%d", $heroesPerPlayer);
 
-// game loop
-$target = [-1,-1,-1];
+function d2b($a,$b){
+    /** @var Monster $a */
+    /** @var Monster $b */
+    if ($a->getBaseDistance() == $b->getBaseDistance()) {
+        return 0 ;
+    }
+    return ($a->getBaseDistance() < $b->getBaseDistance()) ? -1 : 1;
+}
 
+$maxHealth = 0;
 while (TRUE)
 {
-    $danger=$heroes=$monsters=[];
+    $danger=$hero=$mob=$enemy=[];
     $utilities = new Utilities();
 
 
@@ -334,100 +548,71 @@ while (TRUE)
         fscanf(STDIN, "%d %d %d %d %d %d %d %d %d %d %d", $id, $type, $x, $y, $shieldLife, $isControlled, $health, $vx, $vy, $nearBase, $threatFor);
         if( $type == 0 && $threatFor == 1){
             $danger[$id] = new Monster( $id, $x, $y, $health, $vx, $vy, $nearBase, $threatFor,$shieldLife,$isControlled );
-
-        }elseif( $type == 0 && $threatFor != 1 && $isControlled == 0){
-            $monsters[$id] = new Monster( $id, $x, $y, $health, $vx, $vy, $nearBase, $threatFor,$shieldLife,$isControlled );
-
+            $danger[$id]->setBaseDistance($utilities->getBaseDistance($danger[$id],$baseX,$baseY));
+            if($maxHealth < $health) $maxHealth = $health;
+        }elseif( $type == 0 && $isControlled == 0){
+            $mob[$id] = new Monster( $id, $x, $y, $health, $vx, $vy, $nearBase, $threatFor,$shieldLife,$isControlled );
+            if($maxHealth < $health) $maxHealth = $health;
         }elseif( $type == 1){
-            $heroes[$id] = new Hero( $id, $x, $y);
-            //error_log(var_export($heroes, true));
-
+            $hero[] = new Hero( $id, $x, $y,$shieldLife,$isControlled);
+        }elseif( $type == 2){
+            $enemy[] = new Hero( $id, $x, $y,$shieldLife,$isControlled);
         }
     }
     //error_log(var_export("danger: ". count($danger), true));
     //error_log(var_export("monster: ". count($monsters), true));
+    usort($danger, "d2b");
+    //error_log(var_export($danger, true));
     foreach ($danger as $m){
-        $h = $utilities->getNearestHero($m,$heroes);
-        if (is_a($h, 'Hero')) $heroes[$h->getId()]->setTarget($h->getTarget());
+        $h = $utilities->getNearestHero($m,$hero);
+        //error_log(var_export($h, true));
+        //error_log(var_export($hero, true));
+        if (is_a($h, 'Hero') && $h->getId() < 3){
+            $hero[$h->getId()]->setTarget($h->getTarget());
+        }elseif(is_a($h, 'Hero')){
+            $hero[$h->getId()-3]->setTarget($h->getTarget());
+        }
     }
-    for ($i = 0; $i < $heroesPerPlayer; $i++)
+    for ($i = 0; $i < $heroesPerPlayer-1; $i++)
     {
-        if($baseX != 0){
-            $j = 3 + $i;
-        }else{
-            $j = $i;
-        }
-        $t = $heroes[$j]->getTarget();
-        if($i == 2 && count($monsters) > 0 && count($danger) < 3){
-
-             $danger = $monsters;
-             if(!array_key_exists($target[2],$danger)){
-                 $t = $utilities->getNearestMonster($heroes[$j],$danger);
-                 if ( is_a($t, 'Monster')) {
-                     $target[2] = $t->getId();
-                     $t = $t->getId();
-                 }else{
-                     $target[2] = -1;
-                     $t = -1;
-                 }
-             }else{
-                 $t = $target[2];
-             }
-        }
-        $bdist = $utilities->getBaseDistance($heroes[$j],$baseX,$baseY);
-
-        if ($t != -1)
-        {
-            $dist = $utilities->getDistance($heroes[$j],$danger[$t]);
-            if($dist <=2200 && $dist > 800 && $myM >= 30 && $danger[$t]->getShieldLife() == 0){
-                echo("SPELL CONTROL {$t} {$enemyBase['x']} {$enemyBase['y']} {$j}@{$t}\n");
-                $myM-=10;
-            }elseif($dist <=1280 &&
-                    $myM >= 10 &&
-                    ($bdist <= 5000) &&
-                    $danger[$t]->getShieldLife() == 0)
-                    {
-                echo("SPELL WIND {$enemyBase['x']} {$enemyBase['y']} {$j}#{$t}\n");
-                $myM-=10;
-            }elseif($bdist < 10000){
-                $x = ($danger[$t]->getX()+$danger[$t]->getVx());
-                $y = ($danger[$t]->getY()+$danger[$t]->getVy());
-                echo("MOVE {$x} {$y} {$j}#{$t}\n");
-            }else{
-                $x = ($danger[$t]->getX()+$danger[$t]->getVx());
-                $y = ($danger[$t]->getY()+$danger[$t]->getVy());
-                echo("MOVE {$baseX} {$baseY} {$j}!home\n");
-            }
-
-
-        }else{
-            switch($heroes[$j]->getId()){
-                case 0:
-                    echo("MOVE 6000 2000 {$j}\n");
-                    break;
-                case 1:
-                    echo("MOVE 3500 5000 {$j}\n");
-                    break;
-                case 2:
-                    echo("MOVE 4000 3000 {$j}\n");
-                    break;
-                case 3:
-                    echo("MOVE 14000 4000 {$j}\n");
-                    break;
-                case 4:
-                    echo("MOVE 12000 6800 {$j}\n");
-                    break;
-                case 5:
-                    echo("MOVE 13850 5700 {$j}\n");
-                    break;
+        /** @var Hero $h */
+        $h = $hero[$i];
+        $t = $h->getTarget();
+        $bdist = $utilities->getBaseDistance($h,$baseX,$baseY);
+        //error_log(var_export($bdist, true));
+        $shield = FALSE;
+        foreach ($enemy as $e){
+            //error_log(var_export("ed: ".$utilities->getDistance($h,$e), true));
+            if($utilities->getDistance($h,$e) < 3000 && $h->getShieldLife() == 0 && $myM >=10 && $mana >=10){
+                $shield = TRUE;
             }
         }
 
+        $move = $utilities->getMove($t,$shield,$h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY);
+
+        echo($move);
     }
+    $h = $hero[2];
+    $bdist = $utilities->getBaseDistance($h,$baseX,$baseY);
+
+    $move = $utilities->getMoveBerzerker($h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY);
+
+    echo($move);
 }
+// Mob bouge de 400 u
 // hero bouge de 800 unité par tour
 // Wind Rayon = 1280
 // Ne pas target les Meeple qui sont un danger pour l'adversaire
 // Ne pas spell un Meeple qui est shield
 //error_log(var_export($m, true));
+
+// essayer de shield les threatforenemy
+// essayer de shield les mob a moins de 12 tours de la base ennemie
+// Ne pas control 2 fois le meme Meeple
+// ne pas control un mob qui n'a pas la vie max sauf si threat
+// Wind si 4 mob touché
+// ne pas control 2* le meme mob
+//check pq autant de mana
+
+// shield mob si ebdist < 6000
 ?>
