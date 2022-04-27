@@ -87,11 +87,13 @@ class Utilities
     {
         if($t == -1 )
         {
+            error_log(var_export("A", true));
             if($shield) {
                 $return = "SPELL SHIELD {$h->getId()} ---\n";
                 $myM -= 10;
-            }elseif(count($mob)>0 && $loop = 0){
+            }elseif(count($mob)>0 && $loop == 0){
                 $mobTarget = $this->getNearestMonster($h,$mob);
+                error_log(var_export($mobTarget, true));
                 $return = $this->getMove($mobTarget->getId(),$shield,$h,$myM,$danger,$mob,$maxHealth,$enemyBase,$bdist,$baseX,$baseY,$loop = 1);
             }else {
                 switch ($h->getId()) {
@@ -111,6 +113,7 @@ class Utilities
             }
 
         }else{
+            error_log(var_export("B", true));
             /** @var Monster $mobTarget */
             $mobTarget = $this->getMobById($t, $danger + $mob);
             $dist = $this->getDistance($h,$mobTarget);
